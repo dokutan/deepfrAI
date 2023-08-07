@@ -1,4 +1,7 @@
+archive.zip
 dataset/train/hr/*
 dataset/train/lr/*
 dataset/val/hr/*
 dataset/val/lr/*
+**/__pycache__
+traiNNer/tb_logger

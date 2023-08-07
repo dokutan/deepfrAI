@@ -1,0 +1,147 @@
+# General settings
+name: 001_srflow_template
+use_tb_logger: true
+model: srflow
+scale: 4
+gpu_ids: [0]
+# use_amp: true
+# use_swa: false
+
+# Dataset options:
+datasets:
+  train:
+    name: DIV2K
+    mode: aligned
+    dataroot_HR: [
+      '../datasets/train/hr1', 
+      '../datasets/train/hr2', 
+      '../datasets/train/hr3'
+      ] # high resolution / ground truth images
+    dataroot_LR: [
+      '../datasets/train/lr1', 
+      '../datasets/train/lr2' #,
+      # '../datasets/train/lr3'
+      ] # low resolution images
+    subset_file: null
+    use_shuffle: true
+    znorm: false
+    n_workers: 4
+    batch_size: 8
+    virtual_batch_size: 8
+    preprocess: crop
+    crop_size: 128
+    image_channels: 3 # number of channels to load images in
+    quant: 255 #32
+
+    # LR and HR modifiers.
+    # aug_downscale: 0.2
+    # shape_change: reshape_lr
+
+    # Enable random downscaling of HR images (will fix LR pair to correct size)
+    # hr_downscale: true
+    # hr_downscale_amt: [2, 1.75, 1.5, 1]
+    # #pre_crop: true
+
+    # On the fly generation of LR:
+    # dataroot_kernels: '../training/kernels/results/'
+    lr_downscale: true
+    lr_downscale_types: ["linear", "bicubic"]
+
+    # Rotations augmentations:
+    use_flip: true
+    use_rot: true
+    use_hrrot: false
+    
+    # Noise and blur augmentations:
+    # lr_blur: false
+    # lr_blur_types: {gaussian: 1, clean: 3}
+    # # noise_data: ../noise_patches/normal/
+    # lr_noise: false
+    # lr_noise_types: {gaussian: 1, jpeg: 1, clean: 4}
+    # lr_noise2: false
+    # lr_noise_types2: {jpeg: 1, webp: 1, clean: 2}
+    # hr_noise: false
+    # hr_noise_types:  {gaussian: 1, clean: 4}
+    
+  val: 
+    name: val_set14_part
+    mode: aligned
+    dataroot_B: '../datasets/val/hr'
+    dataroot_A: '../datasets/val/lr'
+    
+    znorm: false
+    quant: 255 #32
+    
+    lr_downscale: false
+    lr_downscale_types: ["linear", "bicubic"]
+    
+path:
+  strict: false # true | false
+  root: '../'
+  # if using full pretrained SRFlow model (set train_RRDB_delay to 0.0):
+  pretrain_model_G: ../experiments/pretrained_models/SRFlow_DF2K_4X.pth
+  # if using RRDB model as pretrained:
+  # load_submodule: RRDB
+  # pretrain_model_G: ../experiments/pretrained_models/RRDB_ESRGAN_x4_mod_arch.pth
+  # if resuming training:
+  # resume_state: '../experiments/debug_002_srflow_x4_DIV2K/training_state/16.state'
+
+heat: 0.9 # This is the standard deviation of the latent vectors
+
+# Generator options:
+network_G:
+  which_model_G: SRFlow_net
+  in_nc: 3
+  out_nc: 3
+  nf: 64
+  nb: 23
+  upscale: 4
+  train_RRDB: false
+  train_RRDB_delay: 0.5
+
+  flow:
+    K: 16
+    L: 3
+    noInitialInj: true
+    coupling: CondAffineSeparatedAndCond
+    additionalFlowNoAffine: 2
+    split:
+      enable: true
+    fea_up0: true
+    stackRRDB:
+      blocks: [ 1, 8, 15, 22 ]
+      concat: true
+    augmentation:
+      noiseQuant: true
+
+# Training settings:
+train:
+  lr_G: 2.5e-4
+  weight_decay_G: 0
+  beta1_G: 0.9
+  beta2_G: 0.99
+  lr_scheme: MultiStepLR
+  warmup_iter: -1  # no warm up
+  lr_steps_rel: [ 0.5, 0.75, 0.9, 0.95 ]
+  lr_gamma: 0.5
+
+  # fl_weight: 1
+  # l1_weight: 0
+
+  manual_seed: 10
+  niter: 200000
+  val_freq: 40000
+  overwrite_val_imgs: true
+  # val_comparison: true
+  metrics: 'psnr,ssim,lpips' # select from: "psnr,ssim,lpips" or a combination separated by comma ","
+
+# Validation settings
+val:
+  # validation will produce "n_sample" samples for each heat value in "heats"
+  heats: [ 0.0, 0.5, 0.75, 1.0 ] # [ 0.0, 0.7, 0.8, 0.9 ]
+  n_sample: 3
+
+# Logger
+logger:
+  print_freq: 100
+  save_checkpoint_freq: 1e3

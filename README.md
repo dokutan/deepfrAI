@@ -1,6 +1,6 @@
 # deepfrAI
 
-Deep frying 
+An ESRGAN model to deep fry images.
 
 ## How to use this?
 

@@ -1,10 +1,10 @@
 # deepfrAI
 
-TODO
+Deep frying 
 
 ## How to use this?
 
-TODO
+Download the model from the releases page, [chaiNNer](https://github.com/chaiNNer-org/chaiNNer) is the easiest way to use the trained model. Other tools that work with ESRGAN models should be compatible as well.
 
 ## Used ressources
 
@@ -27,3 +27,5 @@ TODO
 cd traiNNer/codes
 python3 train.py -opt train_sr.yml
 ```
+
+I trained the model for 40000 iterations.

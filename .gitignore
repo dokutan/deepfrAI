@@ -5,3 +5,4 @@ dataset/val/hr/*
 dataset/val/lr/*
 **/__pycache__
 traiNNer/tb_logger
+traiNNer/experiments
